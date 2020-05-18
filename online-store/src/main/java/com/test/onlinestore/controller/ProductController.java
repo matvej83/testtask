@@ -8,11 +8,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
-@Api(tags = {"product"})
+@Api(tags = {"products"})
 @RestController
 @RequestMapping("/products")
 @AllArgsConstructor
@@ -30,44 +29,48 @@ public class ProductController {
 
     @ApiOperation(value = "Get product by id", response = Product.class)
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
-    public Product getProductById(@PathVariable("id") Long id)
+    public Product getProductById(@PathVariable("id") Long id, Model model)
             throws RecordNotFoundException {
+        model.addAttribute("method", "get");
         return productRepository.findProductById(id);
     }
 
     @ApiOperation(value = "Add new product")
     @RequestMapping(value = "/add", method = RequestMethod.POST, produces = "application/json")
     public String add(@RequestParam String name, @RequestParam Double price, @RequestParam String ean,
-                      Map<String, Object> model) {
+                      Model model) {
         Product product = new Product(name, price, ean);
         productRepository.save(product);
         Iterable<Product> products = productRepository.findAll();
-        model.put("products", products);
-        return "test";
+        model.addAttribute("products", products);
+        return "main";
     }
 
     @ApiOperation(value = "Get all products")
     @RequestMapping(value = "/all", method = RequestMethod.GET, produces = "application/json")
-    public Iterable<Product> getAllProducts()
+    public Iterable<Product> getAllProducts(Model model)
             throws RecordNotFoundException {
+        model.addAttribute("method", "get");
         return productRepository.findAll();
     }
 
     @ApiOperation(value = "Update a product", response = Product.class)
     @RequestMapping(value = "/update/{id}", method = RequestMethod.PUT, produces = "application/json")
-    public boolean updateProduct(@PathVariable("id") Long id, @RequestBody Product product) {
+    public boolean updateProduct(@PathVariable("id") Long id, @RequestBody Product product, Model model) {
         Product storedProduct = productRepository.findProductById(id);
         storedProduct.setName(product.getName());
         storedProduct.setPrice(product.getPrice());
         storedProduct.setEan(product.getEan());
         productRepository.save(storedProduct);
+        model.addAttribute("product", product);
         return true;
     }
 
     @ApiOperation(value = "Delete a product")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = "application/json")
-    public boolean delete(@PathVariable("id") Long id) {
+    public boolean delete(@PathVariable("id") Long id, Model model) {
         productRepository.deleteById(id);
+        model.addAttribute("method", "post");
         return true;
     }
 

@@ -24,7 +24,7 @@ public class Product {
     @Column(nullable = false, unique = true)
     private String ean;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     List<ProductsInCart> productsInCarts;
 
     public Product() {
